@@ -67,8 +67,8 @@ class BullsAndCows_proyecto( BullsAndCowsBasePlayer ):
             return self.m_CurrentSolution
 
         #time.sleep(0.3)
-        print("Current solution "+self.m_CurrentSolution)
-        print("Numero de fijas detectadas: "+str(len(self.fijasDetectadas)))
+        #print("Current solution "+self.m_CurrentSolution)
+        #print("Numero de fijas detectadas: "+str(len(self.fijasDetectadas)))
 
         if(self.cambioFueRealizado == True):
 
@@ -182,7 +182,7 @@ class BullsAndCows_proyecto( BullsAndCowsBasePlayer ):
 
         elif( b+c == self.m_GuessSize or self.vaEnPasoMoverPicas == True ): #ya están todos los caracteres que se necesitan
 
-            print("caso todos ya estan")
+            #print("caso todos ya estan")
 
             #time.sleep(0.4)
 
@@ -191,7 +191,7 @@ class BullsAndCows_proyecto( BullsAndCowsBasePlayer ):
 
             if (self.picaDentroDeSolucion == False):
 
-                print("entra primera vez a jugar con picas")
+                #print("entra primera vez a jugar con picas")
 
                 while(self.posicionesFijas[self.posicionInicialPica] == True):
                     self.posicionInicialPica = self.posicionInicialPica + 1
@@ -211,17 +211,17 @@ class BullsAndCows_proyecto( BullsAndCowsBasePlayer ):
 
                 self.picaDentroDeSolucion = True
 
-                print("termina la primera vez")
+                #print("termina la primera vez")
 
             else: #se está moviendo una pica
 
-                print("entra segunda vez a jugar con picas")
+                #print("entra segunda vez a jugar con picas")
 
-                print(self.posicionesFijas)
+                #print(self.posicionesFijas)
 
                 if (b > self.fijasIntentoAnterior): #si cambió # de fijas
 
-                    print("aumento fijas")
+                    #print("aumento fijas")
 
                     nuevaFija = Tupla( self.posicionActualPica, self.m_CurrentSolution[self.posicionActualPica] )
                     self.fijasDetectadas.append(nuevaFija)
@@ -243,7 +243,7 @@ class BullsAndCows_proyecto( BullsAndCowsBasePlayer ):
 
                 elif(b < self.fijasIntentoAnterior):
 
-                    print("se redujo fijas")
+                    #print("se redujo fijas")
 
                     #revertir el cambio y marcar fija
 
@@ -265,7 +265,7 @@ class BullsAndCows_proyecto( BullsAndCowsBasePlayer ):
 
                 else: #continuar moviendo la pica, porque no cambió el # de fijas
 
-                    print("se continua moviendo pica")
+                    #print("se continua moviendo pica")
 
                     #revertir el cambio
                     listCurrentSolution = list(self.m_CurrentSolution)
