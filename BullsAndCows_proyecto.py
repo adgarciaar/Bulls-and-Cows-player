@@ -43,6 +43,16 @@ class BullsAndCows_proyecto( BullsAndCowsBasePlayer ):
         self.picaTemporal = None
         self.picaDentroDeSolucion = False
 
+        self.seRevirtioFija = False
+        self.seRevirtioPica = False
+
+        self.posicionInicialPica = 0
+        self.posicionActualPica = 0
+        self.picaMoviendose = None
+        self.caracterReemplazado = None
+
+        self.vaEnPasoMoverPicas = False
+
     ## -----------------------------------------------------------------------
     def guess( self, b, c ):
 
@@ -50,12 +60,20 @@ class BullsAndCows_proyecto( BullsAndCowsBasePlayer ):
             s = copy.deepcopy( list( self.m_Alphabet ) )
             random.shuffle( s )
             self.m_CurrentSolution = ''.join( s[ 0: self.m_GuessSize ] )
+
+            self.fijasIntentoAnterior = b
+            self.picasIntentoAnterior = c
+            print("--------------------------------------------------")
             return self.m_CurrentSolution
 
-        time.sleep(0.3)
-        #print("Current solution "+self.m_CurrentSolution+"\n")
+        #time.sleep(0.3)
+        print("Current solution "+self.m_CurrentSolution)
+        print("Numero de fijas detectadas: "+str(len(self.fijasDetectadas)))
 
         if(self.cambioFueRealizado == True):
+
+            #print("fijas intento anterior: "+str(self.fijasIntentoAnterior))
+            #print("picas intento anterior: "+str(self.picasIntentoAnterior))
 
             if( b !=  self.fijasIntentoAnterior or c != self.picasIntentoAnterior):
 
@@ -65,6 +83,8 @@ class BullsAndCows_proyecto( BullsAndCowsBasePlayer ):
 
                 if(b > self.fijasIntentoAnterior): #lo que se agregó es una fija
 
+                    #print("fija detectada agregada")
+
                     nuevaFija = Tupla( self.posicionDelCambio, self.m_CurrentSolution[self.posicionDelCambio] )
                     self.fijasDetectadas.append(nuevaFija)
 
@@ -73,6 +93,8 @@ class BullsAndCows_proyecto( BullsAndCowsBasePlayer ):
                     self.posicionesValidas[ self.posicionDelCambio ] = True
 
                 elif(b < self.fijasIntentoAnterior): #lo que se quitó es una fija
+
+                    #print("fija detectada removida pero puesta")
 
                     nuevaFija = Tupla( self.posicionDelCambio, self.caracterCambiado )
                     self.fijasDetectadas.append(nuevaFija)
@@ -90,18 +112,26 @@ class BullsAndCows_proyecto( BullsAndCowsBasePlayer ):
                     #revertir cambio
                     listCurrentSolution[ self.posicionDelCambio ] = self.caracterCambiado
                     self.m_CurrentSolution = ''.join(listCurrentSolution)
+                    self.seRevirtioFija = True
+                    #self.fijasIntentoAnterior = self.fijasIntentoAnterior + 1
 
-                elif(c > self.picasIntentoAnterior): #lo que se agregó es una pica
+                    #print("ahora quedo: "+self.m_CurrentSolution)
+
+                if(c > self.picasIntentoAnterior and b == self.fijasIntentoAnterior): #lo que se agregó es una pica
+
+                    #print("pica detectada agregada")
 
                     nuevaPica = Tupla( self.posicionDelCambio, self.m_CurrentSolution[self.posicionDelCambio] )
-                    self.picasDetectadas.append(nuevaPica)
+                    #self.picasDetectadas.append(nuevaPica)
 
                     self.posicionesValidas[ self.posicionDelCambio ] = True
 
-                elif(c < self.picasIntentoAnterior): #lo que se quitó es una pica
+                elif(c < self.picasIntentoAnterior and b == self.fijasIntentoAnterior): #lo que se quitó es una pica
+
+                    #print("pica detectada removida pero puesta")
 
                     nuevaPica = Tupla( self.posicionDelCambio, self.caracterCambiado )
-                    self.picasDetectadas.append(nuevaPica)
+                    #self.picasDetectadas.append(nuevaPica)
 
                     self.posicionesValidas[ self.posicionDelCambio ] = True
 
@@ -113,10 +143,30 @@ class BullsAndCows_proyecto( BullsAndCowsBasePlayer ):
                     #revertir cambio
                     listCurrentSolution[ self.posicionDelCambio ] = self.caracterCambiado
                     self.m_CurrentSolution = ''.join(listCurrentSolution)
+                    self.seRevirtioPica = True
+                    #self.picasIntentoAnterior = self.picasIntentoAnterior + 1
+
+                    #print("ahora quedo: "+self.m_CurrentSolution)
 
                 self.cambioFueRealizado = False
                 self.posicionDelCambio = 0
                 self.caracterCambiado = None
+
+                if (self.seRevirtioFija == True):
+                    self.fijasIntentoAnterior = self.fijasIntentoAnterior + 1
+                    self.seRevirtioFija = False
+                    self.picasIntentoAnterior = c
+
+                if (self.seRevirtioPica == True):
+                    self.picasIntentoAnterior = self.picasIntentoAnterior + 1
+                    self.seRevirtioPica = False
+                    self.fijasIntentoAnterior = b
+
+                if( self.seRevirtioFija == False and self.seRevirtioPica == False):
+                    self.fijasIntentoAnterior = b
+                    self.picasIntentoAnterior = c
+                print("--------------------------------------------------")
+                return self.m_CurrentSolution
 
         if (b==0 and c==0): #descartar del alfabeto todos los caracteres que no van
 
@@ -130,82 +180,121 @@ class BullsAndCows_proyecto( BullsAndCowsBasePlayer ):
             random.shuffle( s )
             self.m_CurrentSolution = ''.join( s[ 0: self.m_GuessSize ] )
 
-        elif( b+c == self.m_GuessSize ): #ya están todos los caracteres que se necesitan
+        elif( b+c == self.m_GuessSize or self.vaEnPasoMoverPicas == True ): #ya están todos los caracteres que se necesitan
+
+            print("caso todos ya estan")
+
+            #time.sleep(0.4)
 
             self.cambioFueRealizado = False
-
-            #self.m_Alphabet = self.m_CurrentSolution
-            #s = copy.deepcopy( list( self.m_Alphabet ) )
-            #random.shuffle( s )
-            #self.m_CurrentSolution = ''.join( s[ 0: self.m_GuessSize ] )
+            self.vaEnPasoMoverPicas = True
 
             if (self.picaDentroDeSolucion == False):
 
-                while(self.posicionesFijas[self.primeraPica] == True):
-                    self.primeraPica = self.primeraPica + 1
+                print("entra primera vez a jugar con picas")
 
-                self.siguientePica = self.primeraPica+1
-                while(self.posicionesFijas[self.siguientePica] == True):
-                    self.siguientePica = self.siguientePica + 1
-                    if(self.siguientePica == len(self.posicionesFijas)):
-                        self.siguientePica = 0
+                while(self.posicionesFijas[self.posicionInicialPica] == True):
+                    self.posicionInicialPica = self.posicionInicialPica + 1
 
-                #hacer un cambio
+                self.posicionActualPica = self.posicionInicialPica + 1
+
+                while(self.posicionesFijas[self.posicionActualPica] == True):
+                    self.posicionActualPica = self.posicionActualPica + 1
+
+                self.picaMoviendose = self.m_CurrentSolution[ self.posicionInicialPica ]
                 listCurrentSolution = list(self.m_CurrentSolution)
-                self.picaTemporal = self.m_CurrentSolution[ self.siguientePica ]
-                #self.ultimoCaracterCambiado = listCurrentSolution[ self.siguientePica ]
-                listCurrentSolution[ self.siguientePica ] = self.m_CurrentSolution[self.primeraPica]
-                listCurrentSolution[ self.primeraPica ] = self.picaTemporal
+                self.caracterReemplazado = self.m_CurrentSolution[ self.posicionActualPica ]
+                listCurrentSolution[ self.posicionActualPica ] = self.picaMoviendose
+                listCurrentSolution[ self.posicionInicialPica ] = '_'
 
                 self.m_CurrentSolution = ''.join(listCurrentSolution)
 
                 self.picaDentroDeSolucion = True
 
-            else:
-                if (b > self.fijasIntentoAnterior):
+                print("termina la primera vez")
 
-                    if(b == self.fijasIntentoAnterior+1): #se ganó una fija
+            else: #se está moviendo una pica
 
-                        nuevaFija = Tupla( self.siguientePica, self.m_CurrentSolution[self.siguientePica] )
-                        self.fijasDetectadas.append(nuevaFija)
+                print("entra segunda vez a jugar con picas")
 
-                        #guardar dónde hay una fija
-                        self.posicionesFijas[ self.siguientePica ] = True
+                print(self.posicionesFijas)
 
-                    elif(b == self.fijasIntentoAnterior+2):
+                if (b > self.fijasIntentoAnterior): #si cambió # de fijas
 
-                        nuevaFija = Tupla( self.siguientePica, self.m_CurrentSolution[self.siguientePica] )
-                        self.fijasDetectadas.append(nuevaFija)
-                        self.posicionesFijas[ self.siguientePica ] = True
+                    print("aumento fijas")
 
-                        nuevaFija = Tupla( self.primeraPica, self.m_CurrentSolution[self.primeraPica] )
-                        self.fijasDetectadas.append(nuevaFija)
-                        self.posicionesFijas[ self.primeraPica ] = True
+                    nuevaFija = Tupla( self.posicionActualPica, self.m_CurrentSolution[self.posicionActualPica] )
+                    self.fijasDetectadas.append(nuevaFija)
 
-                    self.primeraPica = 0
-                    self.siguientePica = 0
-                    self.picaTemporal = None
+                    #guardar dónde hay una fija
+                    self.posicionesFijas[ self.posicionActualPica ] = True
+
+                    #revertir el cambio
+                    listCurrentSolution = list(self.m_CurrentSolution)
+                    #listCurrentSolution[ self.posicionActualPica ] = self.caracterReemplazado
+                    listCurrentSolution[ self.posicionInicialPica ] = self.caracterReemplazado
+                    self.m_CurrentSolution = ''.join(listCurrentSolution)
+
+                    self.posicionInicialPica = 0
+                    self.posicionActualPica = 0
+                    self.picaMoviendose = None
+                    self.caracterReemplazado = None
                     self.picaDentroDeSolucion = False
 
-                #else:
-                self.primeraPica = self.siguientePica
+                elif(b < self.fijasIntentoAnterior):
 
-                self.siguientePica = self.primeraPica+1
-                while(self.posicionesFijas[self.siguientePica] == True): #problema acá con índice
-                    self.siguientePica = self.siguientePica + 1
-                    if(self.siguientePica == len(self.posicionesFijas)):
-                        self.siguientePica = 0
+                    print("se redujo fijas")
 
-                    #hacer un cambio
-                listCurrentSolution = list(self.m_CurrentSolution)
-                self.picaTemporal = self.m_CurrentSolution[ self.siguientePica ]
-                    #self.ultimoCaracterCambiado = listCurrentSolution[ self.siguientePica ]
-                listCurrentSolution[ self.siguientePica ] = self.m_CurrentSolution[self.primeraPica]
-                listCurrentSolution[ self.primeraPica ] = self.picaTemporal
+                    #revertir el cambio y marcar fija
 
-                self.m_CurrentSolution = ''.join(listCurrentSolution)
+                    #revertir el cambio
+                    listCurrentSolution = list(self.m_CurrentSolution)
+                    listCurrentSolution[ self.posicionActualPica ] = self.caracterReemplazado
+                    listCurrentSolution[ self.posicionInicialPica ] = self.picaMoviendose
+                    self.m_CurrentSolution = ''.join(listCurrentSolution)
 
-        else:
+                    #marcar fija
+                    self.posicionesFijas[ self.posicionInicialPica ] = True
+
+                    #reinicializar variables
+                    self.posicionInicialPica = 0
+                    self.posicionActualPica = 0
+                    self.picaMoviendose = None
+                    self.caracterReemplazado = None
+                    self.picaDentroDeSolucion = False
+
+                else: #continuar moviendo la pica, porque no cambió el # de fijas
+
+                    print("se continua moviendo pica")
+
+                    #revertir el cambio
+                    listCurrentSolution = list(self.m_CurrentSolution)
+                    listCurrentSolution[ self.posicionActualPica ] = self.caracterReemplazado
+                    listCurrentSolution[ self.posicionInicialPica ] = self.picaMoviendose
+                    self.m_CurrentSolution = ''.join(listCurrentSolution)
+
+                    #moverse a la siguiente posición con una pica
+                    self.posicionActualPica = self.posicionActualPica + 1
+                    if (self.posicionActualPica == self.m_GuessSize):
+                        self.posicionActualPica = 0
+                    while(self.posicionesFijas[self.posicionActualPica] == True):
+                        self.posicionActualPica = self.posicionActualPica + 1
+                        if (self.posicionActualPica == self.m_GuessSize):
+                            self.posicionActualPica = 0
+
+                    #cambiar la siguiente posición
+                    listCurrentSolution = list(self.m_CurrentSolution)
+                    self.caracterReemplazado = self.m_CurrentSolution[ self.posicionActualPica ]
+                    listCurrentSolution[ self.posicionActualPica ] = self.picaMoviendose
+                    listCurrentSolution[ self.posicionInicialPica ] = '_'
+
+                    self.m_CurrentSolution = ''.join(listCurrentSolution)
+
+
+        else: # se hace cambio porque no se cumple los otros casos principales
+
+            #print("caso se hace cambio")
+
             self.cambioFueRealizado = True
 
             listCurrentSolution = list(self.m_CurrentSolution)
@@ -218,7 +307,7 @@ class BullsAndCows_proyecto( BullsAndCowsBasePlayer ):
 
             if ( self.posicionDelCambio == self.m_GuessSize ):
                 self.posicionDelCambio = 0
-            while ( self.posicionesFijas[ self.posicionDelCambio ] == True ):
+            while ( self.posicionesValidas[ self.posicionDelCambio ] == True ):
                 self.posicionDelCambio = self.posicionDelCambio + 1
                 if ( self.posicionDelCambio == self.m_GuessSize ):
                     self.posicionDelCambio = 0
@@ -232,8 +321,7 @@ class BullsAndCows_proyecto( BullsAndCowsBasePlayer ):
 
             self.m_CurrentSolution = ''.join(listCurrentSolution)
 
-
         self.fijasIntentoAnterior = b
         self.picasIntentoAnterior = c
-
+        print("--------------------------------------------------")
         return self.m_CurrentSolution
